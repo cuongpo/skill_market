@@ -126,12 +126,13 @@ router.post("/message", authMiddleware, async (req, res) => {
   };
 
   try {
-    // Stream Claude response
-    const { fullText } = await streamSkillResponse(
+    // Stream response via 0G Compute (falls back to OpenAI)
+    const { fullText, via0GCompute } = await streamSkillResponse(
       session.skill_content,
       allMessages,
       (delta) => sendEvent("delta", { text: delta })
     );
+    sendEvent("compute", { via0GCompute });
 
     // Deduct OG credits after successful response
     db.prepare(`

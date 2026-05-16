@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { env } from "../config/env.js";
+import { streamVia0GCompute } from "./computeService.js";
 
 const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 
@@ -22,20 +23,30 @@ export type MessageParam = { role: "user" | "assistant"; content: string };
 
 /**
  * Streams a response using the SKILL.md as system context.
- * Calls onDelta for each text chunk, returns full response text when done.
+ * Tries 0G Compute Network first; falls back to OpenAI on any failure.
+ * Returns full response text and the compute source used.
  */
 export async function streamSkillResponse(
   skillContent: string,
   history: MessageParam[],
   onDelta: (text: string) => void
-): Promise<{ fullText: string; inputTokens: number; outputTokens: number }> {
+): Promise<{ fullText: string; inputTokens: number; outputTokens: number; via0GCompute: boolean }> {
+  const systemPrompt = buildSystemPrompt(skillContent);
+
+  try {
+    return await streamVia0GCompute(systemPrompt, history, onDelta);
+  } catch (err) {
+    console.warn("[0G Compute] unavailable, falling back to OpenAI:", (err as Error).message);
+  }
+
+  // OpenAI fallback
   const stream = await openai.chat.completions.create({
     model: env.OPENAI_MODEL,
     max_tokens: 1024,
     stream: true,
     stream_options: { include_usage: true },
     messages: [
-      { role: "system", content: buildSystemPrompt(skillContent) },
+      { role: "system", content: systemPrompt },
       ...history,
     ],
   });
@@ -56,7 +67,7 @@ export async function streamSkillResponse(
     }
   }
 
-  return { fullText, inputTokens, outputTokens };
+  return { fullText, inputTokens, outputTokens, via0GCompute: false };
 }
 
 /**
