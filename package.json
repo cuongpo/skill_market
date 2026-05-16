@@ -1,0 +1,22 @@
+{
+  "name": "skillmarket",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter backend dev\" \"pnpm --filter frontend dev\"",
+    "build": "pnpm --filter frontend build && pnpm --filter backend build",
+    "frontend": "pnpm --filter frontend dev",
+    "backend": "pnpm --filter backend dev",
+    "contracts:test": "cd contracts && forge test",
+    "contracts:deploy:testnet": "cd contracts && forge script script/Deploy.s.sol --rpc-url https://evmrpc-testnet.0g.ai --private-key $DEPLOYER_PRIVATE_KEY --broadcast",
+    "contracts:deploy:mainnet": "cd contracts && forge script script/Deploy.s.sol --rpc-url https://evmrpc.0g.ai --private-key $DEPLOYER_PRIVATE_KEY --broadcast",
+    "seed": "tsx scripts/seed-skills.ts"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.4"
+  },
+  "dependencies": {
+    "ethers": "^6.16.0"
+  }
+}

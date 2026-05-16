@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-soft text-ink font-sans antialiased;
+    min-height: 100vh;
+  }
+
+  * {
+    @apply border-hairline;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f7f7f7; }
+  ::-webkit-scrollbar-thumb { background: #dee1e6; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #c5c9d0; }
+}
+
+@layer utilities {
+  /* Light-mode surface utilities */
+  .bg-surface   { background: #ffffff; }
+  .bg-elevated  { background: #eef0f3; }
+  .border-surface { border-color: #dee1e6; }
+  .text-muted   { color: #7c828a; }
+
+  /* Dark-surface utilities (used inside dark hero bands) */
+  .dark-surface   { background: #0a0b0d; }
+  .dark-elevated  { background: #16181c; }
+}
+
+/* Streaming cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.typing-cursor::after {
+  content: "▊";
+  color: #0052ff;
+  animation: blink 0.8s step-end infinite;
+}
